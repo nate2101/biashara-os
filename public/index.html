@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Biashara-OS — Salon Demo</title>
+<style>
+*{box-sizing:border-box;margin:0}body{font-family:Segoe UI,system-ui;background:#071009;color:#eafff0}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+.badge{display:inline-block;background:linear-gradient(90deg,#a6ff00,#00f0ff);color:#06130a;font-weight:800;padding:6px 14px;border-radius:20px;font-size:12px;letter-spacing:1px}
+h1{font-size:40px;margin:10px 0}h1 span{color:#a6ff00}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:16px}
+.card{background:#0c1a12;border:1px solid #1e3a26;border-radius:16px;padding:18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.stat{background:#102616;border-radius:12px;padding:12px;text-align:center}
+.stat b{font-size:26px;color:#a6ff00;display:block}
+.phone{background:#0a0f0a;border:1px solid #2a4a33;border-radius:24px;padding:14px;height:480px;display:flex;flex-direction:column}
+#chat{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px}
+.bubble{max-width:82%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap}
+.me{align-self:flex-end;background:#00a884;color:#fff;border-bottom-right-radius:4px}
+.bot{align-self:flex-start;background:#1f2c22;border-bottom-left-radius:4px}
+.row{display:flex;gap:8px;margin-top:10px}
+input{flex:1;background:#0c1a12;border:1px solid #2a4a33;color:#fff;border-radius:10px;padding:12px}
+button{background:#a6ff00;border:none;font-weight:800;border-radius:10px;padding:12px 18px;cursor:pointer}
+table{width:100%;font-size:13px;border-collapse:collapse;margin-top:8px}
+td,th{padding:8px;border-bottom:1px solid #1e3a26;text-align:left}
+.script{font-size:13px;line-height:1.7;background:#0a140d;border:1px dashed #2a4a33;border-radius:12px;padding:12px;margin-top:10px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="badge">NATE2101 • BIASHARA-OS MVP • SALON PILOT</div>
+<h1>💈 Biashara-OS <span>Live Demo</span></h1>
+<p>Type below like a customer on WhatsApp. Right side = what the OWNER sees. Show this on YOUR phone in the shop.</p>
+<div class="stats">
+<div class="stat"><b id="s-booked">0</b>AI bookings</div>
+<div class="stat"><b id="s-rev">KES 0</b>revenue locked</div>
+<div class="stat"><b id="s-leads">0</b>leads talked to</div>
+</div>
+<div class="grid">
+<div class="card">
+<h3>📱 Customer WhatsApp (simulated)</h3>
+<div class="phone"><div id="chat"></div>
+<div class="row"><input id="msg" placeholder='Try: hi → book braids → YES'/><button onclick="send()">Send</button></div>
+</div>
+<div style="margin-top:8px">
+<button onclick="quick('hi')">hi</button>
+<button onclick="quick('bei?')">bei?</button>
+<button onclick="quick('book fade')">book fade</button>
+<button onclick="quick('YES')">YES</button>
+</div>
+</div>
+<div class="card">
+<h3>🧾 Owner dashboard (live)</h3>
+<p id="shop"></p>
+<table><thead><tr><th>ID</th><th>Service</th><th>Slot</th><th>KES</th></tr></thead><tbody id="rows"></tbody></table>
+<div class="script">
+<b>60-sec shop script (read this):</b><br/>
+1. "Naeza kuonyesha kwa simu yako in 30 seconds?"<br/>
+2. Type <i>hi</i> → bot replies with prices instantly.<br/>
+3. "Customer aki-text usiku 11pm, hii inajibu na kubook. Asubuhi unapata bookings."<br/>
+4. "Free for 2 weeks. Ikikuletea wateja 10+, unanilipa 10k/month. Isipofanya, natoa. Deal?"<br/>
+5. Take name + WhatsApp → pilot #1 ✅
+</div>
+</div>
+</div>
+</div>
+<script>
+const chat=document.getElementById('chat');
+function add(who,text){const d=document.createElement('div');d.className='bubble '+who;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+async function send(t){const inp=document.getElementById('msg');const text=t||inp.value;if(!text)return;inp.value='';add('me',text);
+const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:'demo-customer',text})});
+const j=await r.json();add('bot',j.reply);load();}
+function quick(t){send(t);}
+async function load(){const r=await fetch('/api/dashboard');const j=await r.json();
+document.getElementById('s-booked').textContent=j.stats.booked;
+document.getElementById('s-rev').textContent='KES '+j.revenue.toLocaleString();
+document.getElementById('s-leads').textContent=j.leads;
+document.getElementById('shop').textContent=j.shop.name+' • '+j.shop.hours+' • '+j.shop.mpesa;
+document.getElementById('rows').innerHTML=j.bookings.map(b=>`<tr><td>${b.id}</td><td>${b.service}</td><td>${b.slot}</td><td>${b.price}</td></tr>`).join('')||'<tr><td colspan=4>No bookings yet — type hi above</td></tr>';}
+document.getElementById('msg').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+add('bot','Karibu! (demo loaded — type hi to start)');load();setInterval(load,3000);
+</script>
+</body>
+</html>

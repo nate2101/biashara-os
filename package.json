@@ -1,0 +1,17 @@
+{
+  "name": "biashara-os",
+  "version": "0.1.0",
+  "description": "WhatsApp AI receptionist + closer for salons/barbershops — by nate2101",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  }
+}
